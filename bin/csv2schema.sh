@@ -169,6 +169,22 @@ do
                 option=""
                 continue
         fi
+
+	# HIVE_TABLE_EXTERNAL
+        if [ "$param" = "--table-external" ]; then
+                continue
+        fi
+
+	# LOAD_FROM_HDFS
+        if [ "$param" = "--load-from-hdfs" ]; then
+                option="OPTION_HDFS_LOAD_LOCATION"
+                continue
+        fi
+        if [ "$option" = "OPTION_HDFS_LOAD_LOCATION" ]; then
+                option=""
+                continue
+        fi
+
 	if [ "$param" = "--parquet-create" ]; then
                 continue
         fi

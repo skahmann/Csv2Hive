@@ -48,6 +48,11 @@ optional arguments:
 		Specify a prefix for the Hive table name.
   --table-suffix TABLE_SUFFIX
 		Specify a suffix for the Hive table name.
+  --table-external
+		Ask to create an external Hive table.
+  --load-from-hdfs HDFS_LOAD_LOCATION
+		Ask to load the CSV file from this directory location in HDFS.
+		CSV file must already exist in HDFS. This script will not modify HDFS.
   --parquet-create
 		Ask to create the Parquet table.
   --parquet-db-name PARQUET_DB_NAME
@@ -178,6 +183,23 @@ do
         if [ "$option" = "OPTION_HIVE_TABLE_SUFFIX" ]; then
                 option=""
                 HIVE_TABLE_SUFFIX=$param
+                continue
+        fi
+
+	# HIVE_TABLE_EXTERNAL
+        if [ "$param" = "--table-external" ]; then
+                HIVE_TABLE_EXTERNAL="1"
+                continue
+        fi
+
+	# LOAD_FROM_HDFS
+        if [ "$param" = "--load-from-hdfs" ]; then
+                option="OPTION_HDFS_LOAD_LOCATION"
+                continue
+        fi
+        if [ "$option" = "OPTION_HDFS_LOAD_LOCATION" ]; then
+                option=""
+                HDFS_LOAD_LOCATION="$param"
                 continue
         fi
 
@@ -342,6 +364,10 @@ if [ "${option}" = "OPTION_HIVE_TABLE_SUFFIX" ] && [ "${HIVE_TABLE_SUFFIX}" = ""
         echo "- Error: The Hive table suffix is missing !"
         exit 1
 fi
+if [ "${option}" = "OPTION_HDFS_LOAD_LOCATION" ] && [ "${HDFS_LOAD_LOCATION}" = "" ]; then
+        echo "- Error: The HDFS load location suffix is missing !"
+        exit 1
+fi
 if [ "${option}" = "OPTION_PARQUET_DB_NAME" ] && [ "${PARQUET_DB_NAME}" = "" ]; then
         echo "- Error: The Parquet DB name is missing !"
         exit 1
@@ -479,23 +505,35 @@ HIVE_TABLE_DELIMITER=${CSV_DELIMITER}
 if [ "${HIVE_TABLE_DELIMITER}" = "\s" ]; then
         HIVE_TABLE_DELIMITER=" "
 fi
-HIVE_TABLE_COMMENT="The table [${HIVE_TABLE_NAME}]"
-PARQUET_TABLE_COMMENT="The parquet table [${PARQUET_TABLE_NAME}]"
 
 # The Hive CREATE TABLE templates
 HIVE_SEP=""
 if [ ! "${HIVE_DB_NAME}" = "" ]; then
         HIVE_SEP="."
 fi
+
+# Create the Hive table as external if asked
+HIVE_EXTERNAL=" "
+if [ "${HIVE_TABLE_EXTERNAL}" = "1" ]; then
+        HIVE_EXTERNAL=" EXTERNAL "
+fi
+
+# Load from HDFS if asked
+LOAD_LOCATION="LOAD DATA LOCAL
+INPATH '${WORK_DIR}/${HDFS_BASENAME}' OVERWRITE INTO TABLE ${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME};"
+if [ ! "${HDFS_LOAD_LOCATION}" = "" ]; then
+        LOAD_LOCATION="LOCATION '${HDFS_LOAD_LOCATION}'
+tblproperties (\"skip.header.line.count\"=\"1\");";
+fi
+
 HIVE_TEMPLATE="DROP TABLE ${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME};
-CREATE TABLE ${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME} (
+CREATE${HIVE_EXTERNAL}TABLE ${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME} (
 ${HIVE_TABLE_MODEL}
 )
 COMMENT \"The table [${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME}]\"
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\\${HIVE_TABLE_DELIMITER}';
-LOAD DATA LOCAL
-INPATH '${WORK_DIR}/${HDFS_BASENAME}' OVERWRITE INTO TABLE ${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME};"
+${LOAD_LOCATION}"
 
 # The Parquet CREATE TABLE template
 PARQUET_SEP=""
