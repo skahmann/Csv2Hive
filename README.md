@@ -82,6 +82,11 @@ optional arguments:
                 Specify a prefix for the Hive table name.
   --table-suffix TABLE_SUFFIX
                 Specify a suffix for the Hive table name.
+  --table-external
+                Ask to create an external Hive table.
+  --load-from-hdfs HDFS_LOAD_LOCATION
+                Ask to load the CSV file from this directory location in HDFS.
+                CSV file must already exist in HDFS. This script will not modify HDFS.
   --parquet-create
                 Ask to create the Parquet table.
   --parquet-db-name PARQUET_DB_NAME
@@ -169,6 +174,14 @@ Sometimes you have to upload some big Dumps which consist in big CSV files (more
 $ csv2hive.sh --create -s ../data/airports.header --table-name airports ../data/airports-noheader.csv
 ```
 Trick: If you want to upload a big CSV file to HDFS with a different name as its original (e.g: 'airports.csv' rather 'airports-noheader.csv'), then it's nicer to create a symbolic link rather to make a copy.
+
+### Example 7 (creating an external Hive table)
+Sometimes you have to upload data to an external Hive table. This allows you to further transform and load data into another table using Map/Reduce. No problem, the only thing you will have to do is set the external table flag as follows :
+```
+$ csv2hive.sh --create --table-external ../data/airports-noheader.csv
+```
+
+
 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif "Donate for Csv2Hive")]
 (https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Z2CBDC45UYGKN)
