@@ -168,6 +168,7 @@ Or you can create directly the Hive table as follows :
 ```
 $ schema2hive --create ../data/airports-no_header.csv
 ```
+
 ### Example 6 (creating a Hive table with a separated header)
 Sometimes you have to upload some big Dumps which consist in big CSV files (more than 100 GB) but without inner headers, also those files are often accompanied by a small separated file which describes the header. No problem, the only thing you will have to do before will be to create a short file containing the header in one line, by using the same delimiter as the one inside the Dump. Finally, you will just have to specify your new header file with the option '-s' as follows :
 ```
@@ -176,12 +177,11 @@ $ csv2hive.sh --create -s ../data/airports.header --table-name airports ../data/
 Trick: If you want to upload a big CSV file to HDFS with a different name as its original (e.g: 'airports.csv' rather 'airports-noheader.csv'), then it's nicer to create a symbolic link rather to make a copy.
 
 ### Example 7 (creating an external Hive table)
-Sometimes you have to upload data to an external Hive table. This allows you to further transform and load data into another table using Map/Reduce. No problem, the only thing you will have to do is set the external table flag as follows :
+Sometimes you have to upload data to an external Hive table. This allows you to host the data in HDFS while Hive just manages the metadata. Furthermore, you are then able to transform and load data into another table using Map/Reduce if you need to. No problem, the only thing you will have to do is set the external table option with the HDFS directory containing the CSV file as follows :
 ```
-$ csv2hive.sh --create --table-external ../data/airports-noheader.csv
+$ csv2hive.sh --create --table-external "/tmp/hdfs_dir" ../data/airports-noheader.csv
 ```
-
-
+Note: This tool does not interact with HDFS directly, it just instructs Hive to load the data from HDFS. You will need to upload and perform clean up in HDFS on your own.
 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif "Donate for Csv2Hive")]
 (https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Z2CBDC45UYGKN)

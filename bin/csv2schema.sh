@@ -170,13 +170,8 @@ do
                 continue
         fi
 
-	# HIVE_TABLE_EXTERNAL
-        if [ "$param" = "--table-external" ]; then
-                continue
-        fi
-
 	# LOAD_FROM_HDFS
-        if [ "$param" = "--load-from-hdfs" ]; then
+        if [ "$param" = "--table-external" ]; then
                 option="OPTION_HDFS_LOAD_LOCATION"
                 continue
         fi

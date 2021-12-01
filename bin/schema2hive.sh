@@ -48,10 +48,8 @@ optional arguments:
 		Specify a prefix for the Hive table name.
   --table-suffix TABLE_SUFFIX
 		Specify a suffix for the Hive table name.
-  --table-external
-		Ask to create an external Hive table.
-  --load-from-hdfs HDFS_LOAD_LOCATION
-		Ask to load the CSV file from this directory location in HDFS.
+  --table-external HDFS_LOAD_LOCATION
+		Ask to create an external Hive table from the CSV file in this directory location in HDFS.
 		CSV file must already exist in HDFS. This script will not modify HDFS.
   --parquet-create
 		Ask to create the Parquet table.
@@ -189,11 +187,6 @@ do
 	# HIVE_TABLE_EXTERNAL
         if [ "$param" = "--table-external" ]; then
                 HIVE_TABLE_EXTERNAL="1"
-                continue
-        fi
-
-	# LOAD_FROM_HDFS
-        if [ "$param" = "--load-from-hdfs" ]; then
                 option="OPTION_HDFS_LOAD_LOCATION"
                 continue
         fi
@@ -521,7 +514,7 @@ fi
 # Load from HDFS if asked
 LOAD_LOCATION="LOAD DATA LOCAL
 INPATH '${WORK_DIR}/${HDFS_BASENAME}' OVERWRITE INTO TABLE ${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME};"
-if [ ! "${HDFS_LOAD_LOCATION}" = "" ]; then
+if [ "${HIVE_TABLE_EXTERNAL}" = "1" ]; then
         LOAD_LOCATION="LOCATION '${HDFS_LOAD_LOCATION}'
 tblproperties (\"skip.header.line.count\"=\"1\");";
 fi
