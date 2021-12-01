@@ -179,7 +179,21 @@ Trick: If you want to upload a big CSV file to HDFS with a different name as its
 ### Example 7 (creating an external Hive table)
 Sometimes you have to upload data to an external Hive table. This allows you to host the data in HDFS while Hive just manages the metadata. Furthermore, you are then able to transform and load data into another table using Map/Reduce if you need to. No problem, the only thing you will have to do is set the external table option with the HDFS directory containing the CSV file as follows :
 ```
-$ csv2hive.sh --create --table-external "/tmp/hdfs_dir" ../data/airports-noheader.csv
+$ csv2hive.sh --create --table-external "/tmp/hdfs_dir" ../data/airports.csv
+```
+Note: This tool does not interact with HDFS directly, it just instructs Hive to load the data from HDFS. You will need to upload and perform clean up in HDFS on your own.
+
+### Example 8 (customizing Parquet options)
+Sometimes you have to customize the load options for Parquet files. This allows you to override the default formats and compression behavior. No problem, the only thing you will have to do is set the parquet options as follows :
+```
+$ csv2hive.sh --create\
+ --parquet-db-name "myParquetDb"\
+ --parquet-table-name "myAirportTable"\
+ --parquet-row-format "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"\
+ --parquet-input-format "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"\
+ --parquet-output-format "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"\
+ --parquet-compression "none"\
+ ../data/airports.csv
 ```
 Note: This tool does not interact with HDFS directly, it just instructs Hive to load the data from HDFS. You will need to upload and perform clean up in HDFS on your own.
 

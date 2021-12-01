@@ -1,0 +1,21 @@
+DROP TABLE myParquetDb.myAirportTable;
+CREATE TABLE myParquetDb.myAirportTable (
+	Airport_ID int,
+	Name string,
+	City string,
+	Country string,
+	IATA_FAA string,
+	ICAO string,
+	Latitude float,
+	Longitude float,
+	Altitude int,
+	Timezone float,
+	DST string,
+	Tz_db_time_zone string
+)
+COMMENT "The table [myParquetDb.myAirportTable]"
+ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+  STORED AS
+    INPUTFORMAT "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+    OUTPUTFORMAT "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat";
+INSERT OVERWRITE TABLE myParquetDb.myAirportTable SELECT * FROM airports;
