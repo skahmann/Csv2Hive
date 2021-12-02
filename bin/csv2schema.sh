@@ -215,6 +215,38 @@ do
                 option=""
                 continue
         fi
+  if [ "$param" = "--parquet-row-format" ]; then
+                option="OPTION_PARQUET_ROW_FORMAT"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_ROW_FORMAT" ]; then
+                option=""
+                continue
+        fi
+  if [ "$param" = "--parquet-input-format" ]; then
+                option="OPTION_PARQUET_INPUT_FORMAT"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_INPUT_FORMAT" ]; then
+                option=""
+                continue
+        fi
+  if [ "$param" = "--parquet-output-format" ]; then
+                option="OPTION_PARQUET_OUTPUT_FORMAT"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_OUTPUT_FORMAT" ]; then
+                option=""
+                continue
+        fi
+  if [ "$param" = "--parquet-compression" ]; then
+                option="OPTION_PARQUET_COMPRESSION"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_COMPRESSION" ]; then
+                option=""
+                continue
+        fi
         if [ "$param" = "--hdfs-file-name" ]; then
                 option="OPTION_HDFS_FILE_NAME"
                 continue

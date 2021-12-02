@@ -1,6 +1,6 @@
 #!/bin/bash
 
-../../bin/csv2hive.sh --create\
+../../bin/csv2hive.sh\
  --parquet-db-name "myParquetDb"\
  --parquet-table-name "myAirportTable"\
  --parquet-row-format "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"\
@@ -8,4 +8,3 @@
  --parquet-output-format "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"\
  --parquet-compression "none"\
  ../data/airports.csv
-

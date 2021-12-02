@@ -62,6 +62,14 @@ optional arguments:
 		Specify a prefix for the Parquet table name.
   --parquet-table-suffix PARQUET_TABLE_SUFFIX
 		Specify a suffix for the Parquet table name.
+	--parquet-row-format PARQUET_ROW_FORMAT
+		Specify another Parquet row format.
+	--parquet-input-format PARQUET_INPUT_FORMAT
+		Specify another Parquet input format.
+	--parquet-output-format PARQUET_OUTPUT_FORMAT
+		Specify another Parquet output format.
+	--parquet-compression PARQUET_COMPRESSION
+		Specify another Parquet compression.
   --hdfs-file-name HDFS_FILE_NAME
 		Specify a name for the HDFS file to be uploaded.
 		If omitted, the CSV file name (minus extension) will be used.
@@ -246,6 +254,50 @@ do
                 continue
         fi
 
+  # PARQUET_ROW_FORMAT
+        if [ "$param" = "--parquet-row-format" ]; then
+                option="OPTION_PARQUET_ROW_FORMAT"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_ROW_FORMAT" ]; then
+                option=""
+                PARQUET_ROW_FORMAT=$param
+                continue
+        fi
+
+  # PARQUET_INPUT_FORMAT
+        if [ "$param" = "--parquet-input-format" ]; then
+                option="OPTION_PARQUET_INPUT_FORMAT"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_INPUT_FORMAT" ]; then
+                option=""
+                PARQUET_INPUT_FORMAT=$param
+                continue
+        fi
+
+  # PARQUET_OUTPUT_FORMAT
+        if [ "$param" = "--parquet-output-format" ]; then
+                option="OPTION_PARQUET_OUTPUT_FORMAT"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_OUTPUT_FORMAT" ]; then
+                option=""
+                PARQUET_OUTPUT_FORMAT=$param
+                continue
+        fi
+
+  # PARQUET_COMPRESSION
+        if [ "$param" = "--parquet-compression" ]; then
+                option="OPTION_PARQUET_COMPRESSION"
+                continue
+        fi
+        if [ "$option" = "OPTION_PARQUET_COMPRESSION" ]; then
+                option=""
+                PARQUET_COMPRESSION=$param
+                continue
+        fi
+
         # HDFS_FILENAME
         if [ "$param" = "--hdfs-file-name" ]; then
                 option="OPTION_HDFS_FILENAME"
@@ -375,6 +427,22 @@ if [ "${option}" = "OPTION_PARQUET_TABLE_PREFIX" ] && [ "${PARQUET_TABLE_PREFIX}
 fi
 if [ "${option}" = "OPTION_PARQUET_TABLE_SUFFIX" ] && [ "${PARQUET_TABLE_SUFFIX}" = "" ]; then
         echo "- Error: The Parquet table suffix is missing !"
+        exit 1
+fi
+if [ "${option}" = "OPTION_PARQUET_ROW_FORMAT" ] && [ "${PARQUET_ROW_FORMAT}" = "" ]; then
+        echo "- Error: The Parquet row format is missing !"
+        exit 1
+fi
+if [ "${option}" = "OPTION_PARQUET_INPUT_FORMAT" ] && [ "${PARQUET_INPUT_FORMAT}" = "" ]; then
+        echo "- Error: The Parquet input format is missing !"
+        exit 1
+fi
+if [ "${option}" = "OPTION_PARQUET_OUTPUT_FORMAT" ] && [ "${PARQUET_OUTPUT_FORMAT}" = "" ]; then
+        echo "- Error: The Parquet output format is missing !"
+        exit 1
+fi
+if [ "${option}" = "OPTION_PARQUET_COMPRESSION" ] && [ "${PARQUET_COMPRESSION}" = "" ]; then
+        echo "- Error: The Parquet compression is missing !"
         exit 1
 fi
 if [ "${option}" = "OPTION_HDFS_FILENAME" ] && [ "${HDFS_FILENAME}" = "" ]; then
@@ -533,16 +601,35 @@ PARQUET_SEP=""
 if [ ! "${PARQUET_DB_NAME}" = "" ]; then
         PARQUET_SEP="."
 fi
+PARQUET_ROW_FORMAT_STRING="parquet.hive.serde.ParquetHiveSerDe"
+if [ ! "${PARQUET_ROW_FORMAT}" = "" ]; then
+        PARQUET_ROW_FORMAT_STRING=${PARQUET_ROW_FORMAT}
+fi
+PARQUET_INPUT_FORMAT_STRING="parquet.hive.DeprecatedParquetInputFormat"
+if [ ! "${PARQUET_INPUT_FORMAT}" = "" ]; then
+        PARQUET_INPUT_FORMAT_STRING=${PARQUET_INPUT_FORMAT}
+fi
+PARQUET_OUTPUT_FORMAT_STRING="parquet.hive.DeprecatedParquetOutputFormat"
+if [ ! "${PARQUET_OUTPUT_FORMAT}" = "" ]; then
+        PARQUET_OUTPUT_FORMAT_STRING=${PARQUET_OUTPUT_FORMAT}
+fi
+PARQUET_COMPRESSION_STRING="set parquet.compression=\"snappy\";"
+if [ ! "${PARQUET_COMPRESSION}" = "" ] && [ "${PARQUET_COMPRESSION}" = "none" ]; then
+        PARQUET_COMPRESSION_STRING=""
+fi
+if [ ! "${PARQUET_COMPRESSION}" = "" ] && [ ! "${PARQUET_COMPRESSION}" = "none" ]; then
+        PARQUET_COMPRESSION_STRING="set parquet.compression=\"${PARQUET_OUTPUT_FORMAT}\""
+fi
 PARQUET_TEMPLATE="DROP TABLE ${PARQUET_DB_NAME}${PARQUET_SEP}${PARQUET_TABLE_NAME};
 CREATE TABLE ${PARQUET_DB_NAME}${PARQUET_SEP}${PARQUET_TABLE_NAME} (
 ${HIVE_TABLE_MODEL}
 )
 COMMENT \"The table [${PARQUET_DB_NAME}${PARQUET_SEP}${PARQUET_TABLE_NAME}]\"
-ROW FORMAT SERDE 'parquet.hive.serde.ParquetHiveSerDe'
+ROW FORMAT SERDE '${PARQUET_ROW_FORMAT_STRING}'
   STORED AS
-    INPUTFORMAT \"parquet.hive.DeprecatedParquetInputFormat\"
-    OUTPUTFORMAT \"parquet.hive.DeprecatedParquetOutputFormat\";
-set parquet.compression=\"snappy\";
+    INPUTFORMAT \"${PARQUET_INPUT_FORMAT_STRING}\"
+    OUTPUTFORMAT \"${PARQUET_OUTPUT_FORMAT_STRING}\";
+${PARQUET_COMPRESSION_STRING}
 INSERT OVERWRITE TABLE ${PARQUET_DB_NAME}${PARQUET_SEP}${PARQUET_TABLE_NAME} SELECT * FROM ${HIVE_DB_NAME}${HIVE_SEP}${HIVE_TABLE_NAME};"
 
 # -- PROG ----------------------------------------------------------------------
