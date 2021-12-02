@@ -98,6 +98,14 @@ optional arguments:
                 Specify a prefix for the Parquet table name.
   --parquet-table-suffix PARQUET_TABLE_SUFFIX
                 Specify a suffix for the Parquet table name.
+  --parquet-row-format PARQUET_ROW_FORMAT
+      Specify another Parquet row format.
+  --parquet-input-format PARQUET_INPUT_FORMAT
+      Specify another Parquet input format.
+  --parquet-output-format PARQUET_OUTPUT_FORMAT
+      Specify another Parquet output format.
+  --parquet-compression PARQUET_COMPRESSION
+      Specify another Parquet compression.
 ```
 
 ## Examples
